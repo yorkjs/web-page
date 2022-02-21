@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+
+  <script src="../dist/web-page.js"></script>
+  <script>
+    WebPage.init()
+    WebPage.addEventListener(
+      WebPage.LOAD,
+      function (data) {
+        console.log('load', data)
+      }
+    )
+    WebPage.addEventListener(
+      WebPage.SHOW,
+      function (data) {
+        console.log('show', data)
+      }
+    )
+    WebPage.addEventListener(
+      WebPage.HIDE,
+      function (data) {
+        console.log('hide', data)
+      }
+    )
+    WebPage.addEventListener(
+      WebPage.UNLOAD,
+      function (data) {
+        console.log('unload', data)
+      }
+    )
+  </script>
+</body>
+</html>
