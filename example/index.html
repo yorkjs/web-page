@@ -12,12 +12,6 @@
   <script>
     WebPage.init()
     WebPage.addEventListener(
-      WebPage.LOAD,
-      function (data) {
-        console.log('load', data)
-      }
-    )
-    WebPage.addEventListener(
       WebPage.SHOW,
       function (data) {
         console.log('show', data)
@@ -39,12 +33,6 @@
       WebPage.LEAVE,
       function (data) {
         console.log('leave', data)
-      }
-    )
-    WebPage.addEventListener(
-      WebPage.UNLOAD,
-      function (data) {
-        console.log('unload', data)
       }
     )
   </script>

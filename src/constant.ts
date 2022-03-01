@@ -1,6 +1,4 @@
-export const LOAD = 'load'
 export const SHOW = 'show'
 export const HIDE = 'hide'
 export const ENTER = 'enter'
 export const LEAVE = 'leave'
-export const UNLOAD = 'unload'

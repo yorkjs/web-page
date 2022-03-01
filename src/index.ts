@@ -1,10 +1,8 @@
 export {
-  LOAD,
   SHOW,
   HIDE,
   ENTER,
   LEAVE,
-  UNLOAD,
 } from './constant'
 
 export {

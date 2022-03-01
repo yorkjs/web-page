@@ -1,24 +1,25 @@
 /**
- * web-page.js v0.0.2
+ * web-page.js v0.0.3
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
 
-const LOAD = 'load';
 const SHOW = 'show';
 const HIDE = 'hide';
 const ENTER = 'enter';
 const LEAVE = 'leave';
-const UNLOAD = 'unload';
 
+let ready = false;
 let visible;
 let persisted;
+const events = {};
 const listeners = {};
+function supportEvent(element, type) {
+    return `on${type}` in element;
+}
 function addDOMEventListener(element, type, listener) {
     if (element.addEventListener) {
-        if (`on${type}` in element) {
-            element.addEventListener(type, listener, true);
-        }
+        element.addEventListener(type, listener, true);
     }
     // @ts-ignore
     else if (element.attachEvent) {
@@ -26,17 +27,37 @@ function addDOMEventListener(element, type, listener) {
         element.attachEvent(`on` + type, listener);
     }
 }
+function debounceListener(listener, delay) {
+    let timer;
+    return function () {
+        if (!timer) {
+            listener(arguments[0]);
+            timer = setTimeout(function () {
+                timer = undefined;
+            }, delay);
+        }
+    };
+}
 function fireEvent(type, event) {
+    const data = {
+        event,
+        visible,
+        persisted,
+    };
+    events[type] = data;
+    if (!ready) {
+        return;
+    }
+    fireEventData(type, data);
+}
+function fireEventData(type, data) {
     const list = listeners[type];
-    if (list) {
-        for (let i = 0, len = list.length; i < len; i++) {
-            if (list[i]) {
-                list[i]({
-                    event,
-                    visible,
-                    persisted,
-                });
-            }
+    if (!list) {
+        return;
+    }
+    for (let i = 0, len = list.length; i < len; i++) {
+        if (list[i]) {
+            list[i](data);
         }
     }
 }
@@ -61,30 +82,27 @@ function onVisibilityChange(event) {
         fireEvent(HIDE, event);
     }
 }
-function onPageShow(event) {
-    // @ts-ignore
+function onPageEnter(event) {
     // 页面是否从浏览器缓存读取
-    persisted = event.persisted;
+    // @ts-ignore
+    if (typeof event.persisted === 'boolean') {
+        // @ts-ignore
+        persisted = event.persisted;
+    }
     fireEvent(ENTER, event);
 }
-function onPageHide(event) {
+const onPageLeave = debounceListener(function (event) {
     fireEvent(LEAVE, event);
-}
-function onUnload(event) {
-    fireEvent(UNLOAD, event);
-}
+}, 200);
 function init() {
     updateVisible();
-    addDOMEventListener(document, 'visibilitychange', onVisibilityChange);
-    addDOMEventListener(window, 'pageshow', onPageShow);
-    addDOMEventListener(window, 'pagehide', onPageHide);
-    addDOMEventListener(window, 'beforeunload', onUnload);
+    ready = true;
 }
 function addEventListener(type, listener) {
     const list = listeners[type] || (listeners[type] = []);
     list.push(listener);
-    if (type === LOAD) {
-        fireEvent(LOAD);
+    if (type === ENTER && events[type]) {
+        fireEventData(type, events[type]);
     }
     return {
         remove() {
@@ -96,11 +114,24 @@ function addEventListener(type, listener) {
         }
     };
 }
+if (supportEvent(document, 'visibilitychange')) {
+    addDOMEventListener(document, 'visibilitychange', onVisibilityChange);
+}
+if (supportEvent(window, 'pageshow')) {
+    addDOMEventListener(window, 'pageshow', onPageEnter);
+}
+else {
+    addDOMEventListener(window, 'load', onPageEnter);
+}
+if (supportEvent(window, 'pagehide')) {
+    addDOMEventListener(window, 'pagehide', onPageLeave);
+}
+addDOMEventListener(window, 'beforeunload', onPageLeave);
 
 /**
  * 版本
  */
-const version = "0.0.2";
+const version = "0.0.3";
 
-export { ENTER, HIDE, LEAVE, LOAD, SHOW, UNLOAD, addEventListener, init, version };
+export { ENTER, HIDE, LEAVE, SHOW, addEventListener, init, version };
 //# sourceMappingURL=web-page.esm.js.map

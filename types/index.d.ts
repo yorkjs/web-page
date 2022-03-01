@@ -1,6 +1,6 @@
-export { LOAD, SHOW, HIDE, ENTER, LEAVE, UNLOAD, } from './constant';
+export { SHOW, HIDE, ENTER, LEAVE, } from './constant';
 export { init, addEventListener, } from './lifeCycle';
 /**
  * 版本
  */
-export declare const version = "0.0.2";
+export declare const version = "0.0.3";

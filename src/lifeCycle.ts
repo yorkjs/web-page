@@ -1,22 +1,30 @@
 import {
-  LOAD,
   SHOW,
   HIDE,
   ENTER,
   LEAVE,
-  UNLOAD,
 } from './constant'
 
+type EventData = {
+  visible: boolean | undefined
+  persisted: boolean | undefined
+  event: Event | undefined
+}
+
+let ready = false
 let visible: boolean | undefined
 let persisted: boolean | undefined
 
+const events: Record<string, EventData> = { }
 const listeners: Record<string, Function[]> = { }
+
+function supportEvent(element: HTMLElement | Window | Document, type: string) {
+  return `on${type}` in element
+}
 
 function addDOMEventListener(element: HTMLElement | Window | Document, type: string, listener: EventListener) {
   if (element.addEventListener) {
-    if (`on${type}` in element) {
-      element.addEventListener(type, listener, true)
-    }
+    element.addEventListener(type, listener, true)
   }
   // @ts-ignore
   else if (element.attachEvent) {
@@ -25,19 +33,60 @@ function addDOMEventListener(element: HTMLElement | Window | Document, type: str
   }
 }
 
+function debounceListener(listener: Function, delay: number) {
+
+  let timer: any
+
+  return function () {
+
+    if (!timer) {
+
+      listener(arguments[0])
+
+      timer = setTimeout(
+        function () {
+          timer = undefined
+        },
+        delay
+      )
+
+    }
+
+  }
+
+}
+
 function fireEvent(type: string, event?: Event) {
+
+  const data: EventData = {
+    event,
+    visible,
+    persisted,
+  }
+
+  events[type] = data
+
+  if (!ready) {
+    return
+  }
+
+  fireEventData(type, data)
+
+}
+
+function fireEventData(type: string, data: EventData) {
+
   const list = listeners[type]
-  if (list) {
-    for (let i = 0, len = list.length; i < len; i++) {
-      if (list[i]) {
-        list[i]({
-          event,
-          visible,
-          persisted,
-        })
-      }
+  if (!list) {
+    return
+  }
+
+  for (let i = 0, len = list.length; i < len; i++) {
+    if (list[i]) {
+      list[i](data)
     }
   }
+
 }
 
 function updateVisible() {
@@ -63,30 +112,26 @@ function onVisibilityChange(event: Event) {
   }
 }
 
-function onPageShow(event: Event) {
-  // @ts-ignore
+function onPageEnter(event: Event) {
   // 页面是否从浏览器缓存读取
-  persisted = event.persisted
+  // @ts-ignore
+  if (typeof event.persisted === 'boolean') {
+    // @ts-ignore
+    persisted = event.persisted
+  }
   fireEvent(ENTER, event)
 }
 
-function onPageHide(event: Event) {
-  fireEvent(LEAVE, event)
-}
-
-function onUnload(event: Event) {
-  fireEvent(UNLOAD, event)
-}
+const onPageLeave = debounceListener(
+  function (event: Event) {
+    fireEvent(LEAVE, event)
+  },
+  200
+)
 
 export function init() {
-
   updateVisible()
-
-  addDOMEventListener(document, 'visibilitychange', onVisibilityChange)
-  addDOMEventListener(window, 'pageshow', onPageShow)
-  addDOMEventListener(window, 'pagehide', onPageHide)
-  addDOMEventListener(window, 'beforeunload', onUnload)
-
+  ready = true
 }
 
 export function addEventListener(type: string, listener: Function) {
@@ -94,8 +139,8 @@ export function addEventListener(type: string, listener: Function) {
   const list = listeners[type] || (listeners[type] = [])
   list.push(listener)
 
-  if (type === LOAD) {
-    fireEvent(LOAD)
+  if (type === ENTER && events[type]) {
+    fireEventData(type, events[type])
   }
 
   return {
@@ -108,3 +153,20 @@ export function addEventListener(type: string, listener: Function) {
     }
   }
 }
+
+if (supportEvent(document, 'visibilitychange')) {
+  addDOMEventListener(document, 'visibilitychange', onVisibilityChange)
+}
+
+if (supportEvent(window, 'pageshow')) {
+  addDOMEventListener(window, 'pageshow', onPageEnter)
+}
+else {
+  addDOMEventListener(window, 'load', onPageEnter)
+}
+
+if (supportEvent(window, 'pagehide')) {
+  addDOMEventListener(window, 'pagehide', onPageLeave)
+}
+
+addDOMEventListener(window, 'beforeunload', onPageLeave)

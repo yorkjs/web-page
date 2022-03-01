@@ -1,6 +1,6 @@
 # web-page
 
-监听网页 `load`、`show`、`hide`、`enter`、``leave`、`unload` 事件。
+监听网页 `show`、`hide`、`enter`、``leave` 事件。
 
 ## 安装
 
@@ -28,12 +28,6 @@ yarn add @yorkjs/web-page
 import * as WebPage from '@yorkjs/web-page'
 WebPage.init()
 WebPage.addEventListener(
-  WebPage.LOAD,
-  function (data) {
-    console.log('load', data)
-  }
-)
-WebPage.addEventListener(
   WebPage.SHOW,
   function (data) {
     console.log('show', data)
@@ -55,12 +49,6 @@ WebPage.addEventListener(
   WebPage.LEAVE,
   function (data) {
     console.log('leave', data)
-  }
-)
-WebPage.addEventListener(
-  WebPage.UNLOAD,
-  function (data) {
-    console.log('unload', data)
   }
 )
 ```
