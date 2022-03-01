@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.1
+ * web-page.js v0.0.2
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -7,9 +7,12 @@
 const LOAD = 'load';
 const SHOW = 'show';
 const HIDE = 'hide';
+const ENTER = 'enter';
+const LEAVE = 'leave';
 const UNLOAD = 'unload';
 
 let visible;
+let persisted;
 const listeners = {};
 function addDOMEventListener(element, type, listener) {
     if (element.addEventListener) {
@@ -31,6 +34,7 @@ function fireEvent(type, event) {
                 list[i]({
                     event,
                     visible,
+                    persisted,
                 });
             }
         }
@@ -57,12 +61,23 @@ function onVisibilityChange(event) {
         fireEvent(HIDE, event);
     }
 }
+function onPageShow(event) {
+    // @ts-ignore
+    // 页面是否从浏览器缓存读取
+    persisted = event.persisted;
+    fireEvent(ENTER, event);
+}
+function onPageHide(event) {
+    fireEvent(LEAVE, event);
+}
 function onUnload(event) {
     fireEvent(UNLOAD, event);
 }
 function init() {
     updateVisible();
     addDOMEventListener(document, 'visibilitychange', onVisibilityChange);
+    addDOMEventListener(window, 'pageshow', onPageShow);
+    addDOMEventListener(window, 'pagehide', onPageHide);
     addDOMEventListener(window, 'beforeunload', onUnload);
 }
 function addEventListener(type, listener) {
@@ -85,7 +100,7 @@ function addEventListener(type, listener) {
 /**
  * 版本
  */
-const version = "0.0.1";
+const version = "0.0.2";
 
-export { HIDE, LOAD, SHOW, UNLOAD, addEventListener, init, version };
+export { ENTER, HIDE, LEAVE, LOAD, SHOW, UNLOAD, addEventListener, init, version };
 //# sourceMappingURL=web-page.esm.js.map

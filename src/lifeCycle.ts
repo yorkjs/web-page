@@ -2,10 +2,13 @@ import {
   LOAD,
   SHOW,
   HIDE,
+  ENTER,
+  LEAVE,
   UNLOAD,
 } from './constant'
 
 let visible: boolean | undefined
+let persisted: boolean | undefined
 
 const listeners: Record<string, Function[]> = { }
 
@@ -30,6 +33,7 @@ function fireEvent(type: string, event?: Event) {
         list[i]({
           event,
           visible,
+          persisted,
         })
       }
     }
@@ -59,6 +63,17 @@ function onVisibilityChange(event: Event) {
   }
 }
 
+function onPageShow(event: Event) {
+  // @ts-ignore
+  // 页面是否从浏览器缓存读取
+  persisted = event.persisted
+  fireEvent(ENTER, event)
+}
+
+function onPageHide(event: Event) {
+  fireEvent(LEAVE, event)
+}
+
 function onUnload(event: Event) {
   fireEvent(UNLOAD, event)
 }
@@ -68,6 +83,8 @@ export function init() {
   updateVisible()
 
   addDOMEventListener(document, 'visibilitychange', onVisibilityChange)
+  addDOMEventListener(window, 'pageshow', onPageShow)
+  addDOMEventListener(window, 'pagehide', onPageHide)
   addDOMEventListener(window, 'beforeunload', onUnload)
 
 }

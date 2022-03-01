@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.1
+ * web-page.js v0.0.2
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -13,9 +13,12 @@
   var LOAD = 'load';
   var SHOW = 'show';
   var HIDE = 'hide';
+  var ENTER = 'enter';
+  var LEAVE = 'leave';
   var UNLOAD = 'unload';
 
   var visible;
+  var persisted;
   var listeners = {};
   function addDOMEventListener(element, type, listener) {
       if (element.addEventListener) {
@@ -37,6 +40,7 @@
                   list[i]({
                       event: event,
                       visible: visible,
+                      persisted: persisted,
                   });
               }
           }
@@ -63,12 +67,23 @@
           fireEvent(HIDE, event);
       }
   }
+  function onPageShow(event) {
+      // @ts-ignore
+      // 页面是否从浏览器缓存读取
+      persisted = event.persisted;
+      fireEvent(ENTER, event);
+  }
+  function onPageHide(event) {
+      fireEvent(LEAVE, event);
+  }
   function onUnload(event) {
       fireEvent(UNLOAD, event);
   }
   function init() {
       updateVisible();
       addDOMEventListener(document, 'visibilitychange', onVisibilityChange);
+      addDOMEventListener(window, 'pageshow', onPageShow);
+      addDOMEventListener(window, 'pagehide', onPageHide);
       addDOMEventListener(window, 'beforeunload', onUnload);
   }
   function addEventListener(type, listener) {
@@ -91,9 +106,11 @@
   /**
    * 版本
    */
-  var version = "0.0.1";
+  var version = "0.0.2";
 
+  exports.ENTER = ENTER;
   exports.HIDE = HIDE;
+  exports.LEAVE = LEAVE;
   exports.LOAD = LOAD;
   exports.SHOW = SHOW;
   exports.UNLOAD = UNLOAD;

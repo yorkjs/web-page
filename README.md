@@ -1,6 +1,6 @@
 # web-page
 
-监听网页 `load`、`show`、`hide`、`unload` 事件。
+监听网页 `load`、`show`、`hide`、`enter`、``leave`、`unload` 事件。
 
 ## 安装
 
@@ -46,6 +46,18 @@ WebPage.addEventListener(
   }
 )
 WebPage.addEventListener(
+  WebPage.ENTER,
+  function (data) {
+    console.log('enter', data)
+  }
+)
+WebPage.addEventListener(
+  WebPage.LEAVE,
+  function (data) {
+    console.log('leave', data)
+  }
+)
+WebPage.addEventListener(
   WebPage.UNLOAD,
   function (data) {
     console.log('unload', data)
@@ -65,4 +77,5 @@ WebPage.addEventListener(
 
 ## 兼容性
 
-`show`、`hide` 事件仅适用于支持 `visibilitychange` 事件的浏览器。
+* `show`、`hide` 事件仅适用于支持 `visibilitychange` 事件的浏览器。
+* `enter`、`leave` 事件仅适用于支持 `pageshow` 和 `pagehide` 事件的浏览器。

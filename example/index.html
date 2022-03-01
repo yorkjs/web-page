@@ -30,6 +30,18 @@
       }
     )
     WebPage.addEventListener(
+      WebPage.ENTER,
+      function (data) {
+        console.log('enter', data)
+      }
+    )
+    WebPage.addEventListener(
+      WebPage.LEAVE,
+      function (data) {
+        console.log('leave', data)
+      }
+    )
+    WebPage.addEventListener(
       WebPage.UNLOAD,
       function (data) {
         console.log('unload', data)
