@@ -1,6 +1,6 @@
 # web-page
 
-监听网页 `show`、`hide`、`enter`、``leave` 事件。
+监听网页 `show`、`hide`、`enter`、`leave` 事件。
 
 ## 安装
 
