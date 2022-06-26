@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.3
+ * web-page.js v0.0.4
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -9,7 +9,8 @@ const HIDE = 'hide';
 const ENTER = 'enter';
 const LEAVE = 'leave';
 
-let ready = false;
+let isInitCalled = false;
+let isPageAlive = false;
 let visible;
 let persisted;
 const events = {};
@@ -45,10 +46,9 @@ function fireEvent(type, event) {
         persisted,
     };
     events[type] = data;
-    if (!ready) {
-        return;
+    if (isInitCalled && isPageAlive) {
+        fireEventData(type, data);
     }
-    fireEventData(type, data);
 }
 function fireEventData(type, data) {
     const list = listeners[type];
@@ -82,21 +82,25 @@ function onVisibilityChange(event) {
         fireEvent(HIDE, event);
     }
 }
-function onPageEnter(event) {
-    // 页面是否从浏览器缓存读取
-    // @ts-ignore
-    if (typeof event.persisted === 'boolean') {
-        // @ts-ignore
-        persisted = event.persisted;
+const onPageEnter = debounceListener(function (event) {
+    if (isPageAlive) {
+        return;
     }
+    isPageAlive = true;
+    // @ts-ignore
+    persisted = event.persisted === true;
     fireEvent(ENTER, event);
-}
+}, 200);
 const onPageLeave = debounceListener(function (event) {
+    if (!isPageAlive) {
+        return;
+    }
     fireEvent(LEAVE, event);
+    isPageAlive = false;
 }, 200);
 function init() {
+    isInitCalled = true;
     updateVisible();
-    ready = true;
 }
 function addEventListener(type, listener) {
     const list = listeners[type] || (listeners[type] = []);
@@ -120,9 +124,7 @@ if (supportEvent(document, 'visibilitychange')) {
 if (supportEvent(window, 'pageshow')) {
     addDOMEventListener(window, 'pageshow', onPageEnter);
 }
-else {
-    addDOMEventListener(window, 'load', onPageEnter);
-}
+addDOMEventListener(window, 'load', onPageEnter);
 if (supportEvent(window, 'pagehide')) {
     addDOMEventListener(window, 'pagehide', onPageLeave);
 }
@@ -131,7 +133,7 @@ addDOMEventListener(window, 'beforeunload', onPageLeave);
 /**
  * 版本
  */
-const version = "0.0.3";
+const version = "0.0.4";
 
 export { ENTER, HIDE, LEAVE, SHOW, addEventListener, init, version };
 //# sourceMappingURL=web-page.esm.js.map

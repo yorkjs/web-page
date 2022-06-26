@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.3
+ * web-page.js v0.0.4
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -8,14 +8,15 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.WebPage = {}));
-}(this, (function (exports) { 'use strict';
+})(this, (function (exports) { 'use strict';
 
   var SHOW = 'show';
   var HIDE = 'hide';
   var ENTER = 'enter';
   var LEAVE = 'leave';
 
-  var ready = false;
+  var isInitCalled = false;
+  var isPageAlive = false;
   var visible;
   var persisted;
   var events = {};
@@ -51,10 +52,9 @@
           persisted: persisted,
       };
       events[type] = data;
-      if (!ready) {
-          return;
+      if (isInitCalled && isPageAlive) {
+          fireEventData(type, data);
       }
-      fireEventData(type, data);
   }
   function fireEventData(type, data) {
       var list = listeners[type];
@@ -88,21 +88,25 @@
           fireEvent(HIDE, event);
       }
   }
-  function onPageEnter(event) {
-      // 页面是否从浏览器缓存读取
-      // @ts-ignore
-      if (typeof event.persisted === 'boolean') {
-          // @ts-ignore
-          persisted = event.persisted;
+  var onPageEnter = debounceListener(function (event) {
+      if (isPageAlive) {
+          return;
       }
+      isPageAlive = true;
+      // @ts-ignore
+      persisted = event.persisted === true;
       fireEvent(ENTER, event);
-  }
+  }, 200);
   var onPageLeave = debounceListener(function (event) {
+      if (!isPageAlive) {
+          return;
+      }
       fireEvent(LEAVE, event);
+      isPageAlive = false;
   }, 200);
   function init() {
+      isInitCalled = true;
       updateVisible();
-      ready = true;
   }
   function addEventListener(type, listener) {
       var list = listeners[type] || (listeners[type] = []);
@@ -126,9 +130,7 @@
   if (supportEvent(window, 'pageshow')) {
       addDOMEventListener(window, 'pageshow', onPageEnter);
   }
-  else {
-      addDOMEventListener(window, 'load', onPageEnter);
-  }
+  addDOMEventListener(window, 'load', onPageEnter);
   if (supportEvent(window, 'pagehide')) {
       addDOMEventListener(window, 'pagehide', onPageLeave);
   }
@@ -137,7 +139,7 @@
   /**
    * 版本
    */
-  var version = "0.0.3";
+  var version = "0.0.4";
 
   exports.ENTER = ENTER;
   exports.HIDE = HIDE;
@@ -149,5 +151,5 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-})));
+}));
 //# sourceMappingURL=web-page.js.map

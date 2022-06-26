@@ -3,4 +3,4 @@ export { init, addEventListener, } from './lifeCycle';
 /**
  * 版本
  */
-export declare const version = "0.0.3";
+export declare const version = "0.0.4";

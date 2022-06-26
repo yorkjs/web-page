@@ -5,15 +5,17 @@ import {
   LEAVE,
 } from './constant'
 
+let isInitCalled = false
+let isPageAlive = false
+
+let visible: boolean | undefined
+let persisted: boolean | undefined
+
 type EventData = {
   visible: boolean | undefined
   persisted: boolean | undefined
   event: Event | undefined
 }
-
-let ready = false
-let visible: boolean | undefined
-let persisted: boolean | undefined
 
 const events: Record<string, EventData> = { }
 const listeners: Record<string, Function[]> = { }
@@ -66,11 +68,9 @@ function fireEvent(type: string, event?: Event) {
 
   events[type] = data
 
-  if (!ready) {
-    return
+  if (isInitCalled && isPageAlive) {
+    fireEventData(type, data)
   }
-
-  fireEventData(type, data)
 
 }
 
@@ -112,26 +112,33 @@ function onVisibilityChange(event: Event) {
   }
 }
 
-function onPageEnter(event: Event) {
-  // 页面是否从浏览器缓存读取
-  // @ts-ignore
-  if (typeof event.persisted === 'boolean') {
+const onPageEnter = debounceListener(
+  function(event: Event) {
+    if (isPageAlive) {
+      return
+    }
+    isPageAlive = true
     // @ts-ignore
-    persisted = event.persisted
-  }
-  fireEvent(ENTER, event)
-}
+    persisted = event.persisted === true
+    fireEvent(ENTER, event)
+  },
+  200
+)
 
 const onPageLeave = debounceListener(
   function (event: Event) {
+    if (!isPageAlive) {
+      return
+    }
     fireEvent(LEAVE, event)
+    isPageAlive = false
   },
   200
 )
 
 export function init() {
+  isInitCalled = true
   updateVisible()
-  ready = true
 }
 
 export function addEventListener(type: string, listener: Function) {
@@ -161,9 +168,8 @@ if (supportEvent(document, 'visibilitychange')) {
 if (supportEvent(window, 'pageshow')) {
   addDOMEventListener(window, 'pageshow', onPageEnter)
 }
-else {
-  addDOMEventListener(window, 'load', onPageEnter)
-}
+
+addDOMEventListener(window, 'load', onPageEnter)
 
 if (supportEvent(window, 'pagehide')) {
   addDOMEventListener(window, 'pagehide', onPageLeave)
