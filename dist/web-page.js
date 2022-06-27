@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.6
+ * web-page.js v0.0.7
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -93,8 +93,6 @@
           return;
       }
       isPageAlive = true;
-      // @ts-ignore
-      persisted = event.persisted === true;
       fireEvent(ENTER, event);
   }, 200);
   var onPageLeave = debounceListener(function (event) {
@@ -104,6 +102,18 @@
       fireEvent(LEAVE, event);
       isPageAlive = false;
   }, 200);
+  function onPageShow(event) {
+      // @ts-ignore
+      persisted = event.persisted;
+      // @ts-ignore
+      onPageEnter(event);
+  }
+  function onPageHide(event) {
+      // @ts-ignore
+      persisted = event.persisted;
+      // @ts-ignore
+      onPageLeave(event);
+  }
   function onPageFreeze() {
       isPageFrozen = true;
   }
@@ -133,11 +143,13 @@
       addDOMEventListener(document, 'visibilitychange', onVisibilityChange);
   }
   if (supportEvent(window, 'pageshow')) {
-      addDOMEventListener(window, 'pageshow', onPageEnter);
+      addDOMEventListener(window, 'pageshow', onPageShow);
   }
-  addDOMEventListener(window, 'load', onPageEnter);
+  else {
+      addDOMEventListener(window, 'load', onPageEnter);
+  }
   if (supportEvent(window, 'pagehide')) {
-      addDOMEventListener(window, 'pagehide', onPageLeave);
+      addDOMEventListener(window, 'pagehide', onPageHide);
   }
   addDOMEventListener(window, 'beforeunload', onPageLeave);
   if (supportEvent(window, 'freeze')) {
@@ -150,7 +162,7 @@
   /**
    * 版本
    */
-  var version = "0.0.6";
+  var version = "0.0.7";
 
   exports.ENTER = ENTER;
   exports.HIDE = HIDE;
