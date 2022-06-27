@@ -130,6 +130,8 @@ const onPageLeave = debounceListener(
     if (!isPageAlive) {
       return
     }
+    // @ts-ignore
+    persisted = event.persisted === true
     fireEvent(LEAVE, event)
     isPageAlive = false
   },

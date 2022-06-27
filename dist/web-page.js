@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.4
+ * web-page.js v0.0.5
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -8,7 +8,7 @@
   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
   typeof define === 'function' && define.amd ? define(['exports'], factory) :
   (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.WebPage = {}));
-})(this, (function (exports) { 'use strict';
+}(this, (function (exports) { 'use strict';
 
   var SHOW = 'show';
   var HIDE = 'hide';
@@ -101,6 +101,8 @@
       if (!isPageAlive) {
           return;
       }
+      // @ts-ignore
+      persisted = event.persisted === true;
       fireEvent(LEAVE, event);
       isPageAlive = false;
   }, 200);
@@ -139,7 +141,7 @@
   /**
    * 版本
    */
-  var version = "0.0.4";
+  var version = "0.0.5";
 
   exports.ENTER = ENTER;
   exports.HIDE = HIDE;
@@ -151,5 +153,5 @@
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));
 //# sourceMappingURL=web-page.js.map

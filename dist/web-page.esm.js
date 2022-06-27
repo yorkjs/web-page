@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.4
+ * web-page.js v0.0.5
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -95,6 +95,8 @@ const onPageLeave = debounceListener(function (event) {
     if (!isPageAlive) {
         return;
     }
+    // @ts-ignore
+    persisted = event.persisted === true;
     fireEvent(LEAVE, event);
     isPageAlive = false;
 }, 200);
@@ -133,7 +135,7 @@ addDOMEventListener(window, 'beforeunload', onPageLeave);
 /**
  * 版本
  */
-const version = "0.0.4";
+const version = "0.0.5";
 
 export { ENTER, HIDE, LEAVE, SHOW, addEventListener, init, version };
 //# sourceMappingURL=web-page.esm.js.map
