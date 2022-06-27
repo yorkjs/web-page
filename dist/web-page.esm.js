@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.7
+ * web-page.js v0.0.8
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -82,6 +82,12 @@ function onVisibilityChange(event) {
         fireEvent(HIDE, event);
     }
 }
+function onPageFreeze() {
+    isPageFrozen = true;
+}
+function onPageResume() {
+    isPageFrozen = false;
+}
 const onPageEnter = debounceListener(function (event) {
     if (isPageAlive) {
         return;
@@ -108,12 +114,6 @@ function onPageHide(event) {
     // @ts-ignore
     onPageLeave(event);
 }
-function onPageFreeze() {
-    isPageFrozen = true;
-}
-function onPageResume() {
-    isPageFrozen = false;
-}
 function init() {
 }
 function addEventListener(type, listener) {
@@ -136,6 +136,12 @@ updateVisible();
 if (supportEvent(document, 'visibilitychange')) {
     addDOMEventListener(document, 'visibilitychange', onVisibilityChange);
 }
+if (supportEvent(document, 'freeze')) {
+    addDOMEventListener(document, 'freeze', onPageFreeze);
+}
+if (supportEvent(document, 'resume')) {
+    addDOMEventListener(document, 'resume', onPageResume);
+}
 if (supportEvent(window, 'pageshow')) {
     addDOMEventListener(window, 'pageshow', onPageShow);
 }
@@ -145,18 +151,15 @@ else {
 if (supportEvent(window, 'pagehide')) {
     addDOMEventListener(window, 'pagehide', onPageHide);
 }
-addDOMEventListener(window, 'beforeunload', onPageLeave);
-if (supportEvent(window, 'freeze')) {
-    addDOMEventListener(window, 'freeze', onPageFreeze);
-}
-if (supportEvent(window, 'resume')) {
-    addDOMEventListener(window, 'resume', onPageResume);
+else {
+    // beforeunload 会阻止浏览器在页面导航缓存中缓存页面
+    addDOMEventListener(window, 'beforeunload', onPageLeave);
 }
 
 /**
  * 版本
  */
-const version = "0.0.7";
+const version = "0.0.8";
 
 export { ENTER, HIDE, LEAVE, SHOW, addEventListener, init, version };
 //# sourceMappingURL=web-page.esm.js.map

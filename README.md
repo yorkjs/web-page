@@ -26,7 +26,6 @@ yarn add @yorkjs/web-page
 
 ```js
 import * as WebPage from '@yorkjs/web-page'
-WebPage.init()
 WebPage.addEventListener(
   WebPage.SHOW,
   function (data) {

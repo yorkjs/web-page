@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.7
+ * web-page.js v0.0.8
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -88,6 +88,12 @@
           fireEvent(HIDE, event);
       }
   }
+  function onPageFreeze() {
+      isPageFrozen = true;
+  }
+  function onPageResume() {
+      isPageFrozen = false;
+  }
   var onPageEnter = debounceListener(function (event) {
       if (isPageAlive) {
           return;
@@ -114,12 +120,6 @@
       // @ts-ignore
       onPageLeave(event);
   }
-  function onPageFreeze() {
-      isPageFrozen = true;
-  }
-  function onPageResume() {
-      isPageFrozen = false;
-  }
   function init() {
   }
   function addEventListener(type, listener) {
@@ -142,6 +142,12 @@
   if (supportEvent(document, 'visibilitychange')) {
       addDOMEventListener(document, 'visibilitychange', onVisibilityChange);
   }
+  if (supportEvent(document, 'freeze')) {
+      addDOMEventListener(document, 'freeze', onPageFreeze);
+  }
+  if (supportEvent(document, 'resume')) {
+      addDOMEventListener(document, 'resume', onPageResume);
+  }
   if (supportEvent(window, 'pageshow')) {
       addDOMEventListener(window, 'pageshow', onPageShow);
   }
@@ -151,18 +157,15 @@
   if (supportEvent(window, 'pagehide')) {
       addDOMEventListener(window, 'pagehide', onPageHide);
   }
-  addDOMEventListener(window, 'beforeunload', onPageLeave);
-  if (supportEvent(window, 'freeze')) {
-      addDOMEventListener(window, 'freeze', onPageFreeze);
-  }
-  if (supportEvent(window, 'resume')) {
-      addDOMEventListener(window, 'resume', onPageResume);
+  else {
+      // beforeunload 会阻止浏览器在页面导航缓存中缓存页面
+      addDOMEventListener(window, 'beforeunload', onPageLeave);
   }
 
   /**
    * 版本
    */
-  var version = "0.0.7";
+  var version = "0.0.8";
 
   exports.ENTER = ENTER;
   exports.HIDE = HIDE;
