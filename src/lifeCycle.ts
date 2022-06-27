@@ -5,8 +5,8 @@ import {
   LEAVE,
 } from './constant'
 
-let isInitCalled = false
 let isPageAlive = false
+let isPageFrozen = false
 
 let visible: boolean | undefined
 let persisted: boolean | undefined
@@ -68,7 +68,7 @@ function fireEvent(type: string, event?: Event) {
 
   events[type] = data
 
-  if (isInitCalled && isPageAlive) {
+  if (isPageAlive && !isPageFrozen) {
     fireEventData(type, data)
   }
 
@@ -130,17 +130,22 @@ const onPageLeave = debounceListener(
     if (!isPageAlive) {
       return
     }
-    // @ts-ignore
-    persisted = event.persisted === true
     fireEvent(LEAVE, event)
     isPageAlive = false
   },
   200
 )
 
+function onPageFreeze() {
+  isPageFrozen = true
+}
+
+function onPageResume() {
+  isPageFrozen = false
+}
+
 export function init() {
-  isInitCalled = true
-  updateVisible()
+
 }
 
 export function addEventListener(type: string, listener: Function) {
@@ -163,6 +168,8 @@ export function addEventListener(type: string, listener: Function) {
   }
 }
 
+updateVisible()
+
 if (supportEvent(document, 'visibilitychange')) {
   addDOMEventListener(document, 'visibilitychange', onVisibilityChange)
 }
@@ -178,3 +185,10 @@ if (supportEvent(window, 'pagehide')) {
 }
 
 addDOMEventListener(window, 'beforeunload', onPageLeave)
+
+if (supportEvent(window, 'freeze')) {
+  addDOMEventListener(window, 'freeze', onPageFreeze)
+}
+if (supportEvent(window, 'resume')) {
+  addDOMEventListener(window, 'resume', onPageResume)
+}

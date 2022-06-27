@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.5
+ * web-page.js v0.0.6
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -9,8 +9,8 @@ const HIDE = 'hide';
 const ENTER = 'enter';
 const LEAVE = 'leave';
 
-let isInitCalled = false;
 let isPageAlive = false;
+let isPageFrozen = false;
 let visible;
 let persisted;
 const events = {};
@@ -46,7 +46,7 @@ function fireEvent(type, event) {
         persisted,
     };
     events[type] = data;
-    if (isInitCalled && isPageAlive) {
+    if (isPageAlive && !isPageFrozen) {
         fireEventData(type, data);
     }
 }
@@ -95,14 +95,16 @@ const onPageLeave = debounceListener(function (event) {
     if (!isPageAlive) {
         return;
     }
-    // @ts-ignore
-    persisted = event.persisted === true;
     fireEvent(LEAVE, event);
     isPageAlive = false;
 }, 200);
+function onPageFreeze() {
+    isPageFrozen = true;
+}
+function onPageResume() {
+    isPageFrozen = false;
+}
 function init() {
-    isInitCalled = true;
-    updateVisible();
 }
 function addEventListener(type, listener) {
     const list = listeners[type] || (listeners[type] = []);
@@ -120,6 +122,7 @@ function addEventListener(type, listener) {
         }
     };
 }
+updateVisible();
 if (supportEvent(document, 'visibilitychange')) {
     addDOMEventListener(document, 'visibilitychange', onVisibilityChange);
 }
@@ -131,11 +134,17 @@ if (supportEvent(window, 'pagehide')) {
     addDOMEventListener(window, 'pagehide', onPageLeave);
 }
 addDOMEventListener(window, 'beforeunload', onPageLeave);
+if (supportEvent(window, 'freeze')) {
+    addDOMEventListener(window, 'freeze', onPageFreeze);
+}
+if (supportEvent(window, 'resume')) {
+    addDOMEventListener(window, 'resume', onPageResume);
+}
 
 /**
  * 版本
  */
-const version = "0.0.5";
+const version = "0.0.6";
 
 export { ENTER, HIDE, LEAVE, SHOW, addEventListener, init, version };
 //# sourceMappingURL=web-page.esm.js.map
