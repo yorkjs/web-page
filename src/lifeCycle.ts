@@ -5,7 +5,7 @@ import {
   LEAVE,
 } from './constant'
 
-let isPageAlive = false
+let isPageAlive: boolean | undefined = undefined
 let isPageFrozen = false
 
 let visible: boolean | undefined
@@ -68,7 +68,7 @@ function fireEvent(type: string, event?: Event) {
 
   events[type] = data
 
-  if (isPageAlive && !isPageFrozen) {
+  if (isPageAlive !== false && !isPageFrozen) {
     fireEventData(type, data)
   }
 
@@ -133,7 +133,7 @@ const onPageEnter = debounceListener(
 
 const onPageLeave = debounceListener(
   function (event: Event) {
-    if (!isPageAlive) {
+    if (isPageAlive === false) {
       return
     }
     fireEvent(LEAVE, event)

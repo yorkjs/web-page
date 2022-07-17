@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.9
+ * web-page.js v0.1.0
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -15,7 +15,7 @@
   var ENTER = 'enter';
   var LEAVE = 'leave';
 
-  var isPageAlive = false;
+  var isPageAlive = undefined;
   var isPageFrozen = false;
   var visible;
   var persisted;
@@ -52,7 +52,7 @@
           persisted: persisted,
       };
       events[type] = data;
-      if (isPageAlive && !isPageFrozen) {
+      if (isPageAlive !== false && !isPageFrozen) {
           fireEventData(type, data);
       }
   }
@@ -102,7 +102,7 @@
       fireEvent(ENTER, event);
   }, 200);
   var onPageLeave = debounceListener(function (event) {
-      if (!isPageAlive) {
+      if (isPageAlive === false) {
           return;
       }
       fireEvent(LEAVE, event);
@@ -162,7 +162,7 @@
   /**
    * 版本
    */
-  var version = "0.0.9";
+  var version = "0.1.0";
 
   exports.ENTER = ENTER;
   exports.HIDE = HIDE;

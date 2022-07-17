@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.9
+ * web-page.js v0.1.0
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -9,7 +9,7 @@ const HIDE = 'hide';
 const ENTER = 'enter';
 const LEAVE = 'leave';
 
-let isPageAlive = false;
+let isPageAlive = undefined;
 let isPageFrozen = false;
 let visible;
 let persisted;
@@ -46,7 +46,7 @@ function fireEvent(type, event) {
         persisted,
     };
     events[type] = data;
-    if (isPageAlive && !isPageFrozen) {
+    if (isPageAlive !== false && !isPageFrozen) {
         fireEventData(type, data);
     }
 }
@@ -96,7 +96,7 @@ const onPageEnter = debounceListener(function (event) {
     fireEvent(ENTER, event);
 }, 200);
 const onPageLeave = debounceListener(function (event) {
-    if (!isPageAlive) {
+    if (isPageAlive === false) {
         return;
     }
     fireEvent(LEAVE, event);
@@ -156,7 +156,7 @@ addDOMEventListener(window, 'beforeunload', onPageLeave);
 /**
  * 版本
  */
-const version = "0.0.9";
+const version = "0.1.0";
 
 export { ENTER, HIDE, LEAVE, SHOW, addEventListener, init, version };
 //# sourceMappingURL=web-page.esm.js.map

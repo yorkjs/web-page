@@ -1,6 +1,6 @@
 {
   "name": "@yorkjs/web-page",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "web page life cycle",
   "main": "dist/web-page.js",
   "module": "dist/web-page.esm.js",
