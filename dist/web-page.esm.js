@@ -1,5 +1,5 @@
 /**
- * web-page.js v0.0.8
+ * web-page.js v0.0.9
  * (c) 2021-2022 musicode
  * Released under the MIT License.
  */
@@ -151,15 +151,12 @@ else {
 if (supportEvent(window, 'pagehide')) {
     addDOMEventListener(window, 'pagehide', onPageHide);
 }
-else {
-    // beforeunload 会阻止浏览器在页面导航缓存中缓存页面
-    addDOMEventListener(window, 'beforeunload', onPageLeave);
-}
+addDOMEventListener(window, 'beforeunload', onPageLeave);
 
 /**
  * 版本
  */
-const version = "0.0.8";
+const version = "0.0.9";
 
 export { ENTER, HIDE, LEAVE, SHOW, addEventListener, init, version };
 //# sourceMappingURL=web-page.esm.js.map
